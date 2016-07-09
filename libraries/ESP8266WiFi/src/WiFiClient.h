@@ -90,7 +90,7 @@ public:
 
     while (src.available() > WIFICLIENT_MAX_PACKET_SIZE){
       src.read(obuf, WIFICLIENT_MAX_PACKET_SIZE);
-      sentLen = write(obuf, WIFICLIENT_MAX_PACKET_SIZE);
+      sentLen = write(obuf, WIFICLIENT_MAX_PACKET_SIZE, false);
       doneLen = doneLen + sentLen;
       if(sentLen != WIFICLIENT_MAX_PACKET_SIZE){
         return doneLen;
@@ -99,7 +99,7 @@ public:
 
     uint16_t leftLen = src.available();
     src.read(obuf, leftLen);
-    sentLen = write(obuf, leftLen);
+    sentLen = write(obuf, leftLen, true);
     doneLen = doneLen + sentLen;
     return doneLen;
   }
@@ -130,11 +130,13 @@ inline size_t WiFiClient::write(T& source, size_t unitSize) {
   size_t size_sent = 0;
   while(true) {
     size_t left = source.available();
-    if (!left)
+    if (left == 0)
+    {
       break;
+    }
     size_t will_send = (left < unitSize) ? left : unitSize;
     source.read(buffer.get(), will_send);
-    size_t cb = write(buffer.get(), will_send);
+    size_t cb = write(buffer.get(), will_send, will_send == left);
     size_sent += cb;
     if (cb != will_send) {
       break;
