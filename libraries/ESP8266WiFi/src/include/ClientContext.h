@@ -31,6 +31,12 @@ typedef void (*discard_cb_t)(void*, ClientContext*);
 extern "C" void esp_yield();
 extern "C" void esp_schedule();
 
+#ifdef LWIP_OPEN_SRC
+typedef err_t recv_ret_t;
+#else
+typedef int32_t recv_ret_t;
+#endif
+
 class ClientContext {
     public:
         ClientContext(tcp_pcb* pcb, discard_cb_t discard_cb, void* discard_cb_arg) :
@@ -247,6 +253,13 @@ class ClientContext {
 					tcp_output( _pcb );
 					_send_waiting = true;
 					delay(5000); // max send timeout
+#if 1	//chrishamm
+					if (_size_sent != 0)
+					{
+						// Kill the connection if not all the data could be transferred
+						abort();
+					}
+#endif
 					_send_waiting = false;
 					DEBUGV(":ww\r\n");
 				}
@@ -324,16 +337,24 @@ class ClientContext {
             }
         }
 
-        int32_t _recv(tcp_pcb* pcb, pbuf* pb, err_t err) {
+        recv_ret_t _recv(tcp_pcb* pcb, pbuf* pb, err_t err) {
 
+#if 1	//dc42
 			UNUSED(pcb);
 			UNUSED(err);
-
+#endif
             if(pb == 0) // connection closed
             {
                 DEBUGV(":rcl\r\n");
-                abort();
+                if (_send_waiting) {
+                    esp_schedule();
+                }
+#if 1	//chrishamm
+				return close();
+#else
+                abort();		                abort();
                 return ERR_ABRT;
+#endif
             }
 
             if(_rx_buf) {
@@ -350,8 +371,9 @@ class ClientContext {
         }
 
         void _error(err_t err) {
+#if 1	//dc42
 			UNUSED(err);
-
+#endif
             DEBUGV(":er %d %d %d\r\n", err, _size_sent, _send_waiting);
             tcp_arg(_pcb, NULL);
             tcp_sent(_pcb, NULL);
@@ -364,11 +386,13 @@ class ClientContext {
         }
 
         err_t _poll(tcp_pcb* pcb) {
- 			UNUSED(pcb);
-			return ERR_OK;
+#if 1	//dc42
+			UNUSED(pcb);
+#endif
+            return ERR_OK;
         }
 
-        static int32_t _s_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *pb, err_t err) {
+        static recv_ret_t _s_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *pb, err_t err) {
             return reinterpret_cast<ClientContext*>(arg)->_recv(tpcb, pb, err);
         }
 

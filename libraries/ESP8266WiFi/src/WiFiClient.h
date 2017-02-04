@@ -46,7 +46,7 @@ public:
   uint8_t status();
   virtual int connect(IPAddress ip, uint16_t port);
   virtual int connect(const char *host, uint16_t port);
- #if 1	//dc42
+#if 1	//dc42
   virtual size_t write(uint8_t b) { return write(b, true); }
   size_t write(uint8_t, bool last);
   virtual size_t write(const uint8_t *buf, size_t size) { return write(buf, size, true); }
@@ -59,7 +59,6 @@ public:
 #endif
   template <typename T>
   size_t write(T& source, size_t unitSize);
-  
 
   virtual int available();
   virtual int read();
@@ -90,7 +89,11 @@ public:
 
     while (src.available() > WIFICLIENT_MAX_PACKET_SIZE){
       src.read(obuf, WIFICLIENT_MAX_PACKET_SIZE);
+#if 1	//dc42
       sentLen = write(obuf, WIFICLIENT_MAX_PACKET_SIZE, false);
+#else
+      sentLen = write(obuf, WIFICLIENT_MAX_PACKET_SIZE);
+#endif
       doneLen = doneLen + sentLen;
       if(sentLen != WIFICLIENT_MAX_PACKET_SIZE){
         return doneLen;
@@ -99,7 +102,11 @@ public:
 
     uint16_t leftLen = src.available();
     src.read(obuf, leftLen);
+#if 1	//dc42
     sentLen = write(obuf, leftLen, true);
+#else
+    sentLen = write(obuf, leftLen);
+#endif
     doneLen = doneLen + sentLen;
     return doneLen;
   }
@@ -130,13 +137,15 @@ inline size_t WiFiClient::write(T& source, size_t unitSize) {
   size_t size_sent = 0;
   while(true) {
     size_t left = source.available();
-    if (left == 0)
-    {
+    if (!left)
       break;
-    }
     size_t will_send = (left < unitSize) ? left : unitSize;
     source.read(buffer.get(), will_send);
+#if 1	//dc42
     size_t cb = write(buffer.get(), will_send, will_send == left);
+#else
+    size_t cb = write(buffer.get(), will_send);
+#endif
     size_sent += cb;
     if (cb != will_send) {
       break;

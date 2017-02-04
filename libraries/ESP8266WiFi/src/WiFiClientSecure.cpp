@@ -66,7 +66,7 @@ class SSLContext {
 public:
     SSLContext() {
         if (_ssl_ctx_refcnt == 0) {
-            _ssl_ctx = ssl_ctx_new(SSL_SERVER_VERIFY_LATER | SSL_DEBUG_OPTS, 0);
+            _ssl_ctx = ssl_ctx_new(SSL_SERVER_VERIFY_LATER | SSL_DEBUG_OPTS | SSL_CONNECT_IN_PARTS | SSL_READ_BLOCKING, 0);
         }
         ++_ssl_ctx_refcnt;
     }
@@ -81,6 +81,8 @@ public:
         if (_ssl_ctx_refcnt == 0) {
             ssl_ctx_free(_ssl_ctx);
         }
+
+        s_io_ctx = nullptr;
     }
 
     void ref() {
@@ -93,8 +95,26 @@ public:
         }
     }
 
-    void connect(ClientContext* ctx) {
-        _ssl = ssl_client_new(_ssl_ctx, reinterpret_cast<int>(ctx), nullptr, 0);
+    void connect(ClientContext* ctx, const char* hostName, uint32_t timeout_ms) {
+        s_io_ctx = ctx;
+        _ssl = ssl_client_new(_ssl_ctx, 0, nullptr, 0, hostName);
+        uint32_t t = millis();
+
+        while (millis() - t < timeout_ms && ssl_handshake_status(_ssl) != SSL_OK) {
+            uint8_t* data;
+            int rc = ssl_read(_ssl, &data);
+            if (rc < SSL_OK) {
+                break;
+            }
+        }
+    }
+
+    void stop() {
+        s_io_ctx = nullptr;
+    }
+
+    bool connected() {
+        return _ssl != nullptr && ssl_handshake_status(_ssl) == SSL_OK;
     }
 
     int read(uint8_t* dst, size_t size) {
@@ -159,6 +179,10 @@ public:
         return _ssl;
     }
 
+    static ClientContext* getIOContext(int fd) {
+        return s_io_ctx;
+    }
+
 protected:
     int _readAll() {
         if (!_ssl)
@@ -187,11 +211,12 @@ protected:
     int _refcnt = 0;
     const uint8_t* _read_ptr = nullptr;
     size_t _available = 0;
+    static ClientContext* s_io_ctx;
 };
 
 SSL_CTX* SSLContext::_ssl_ctx = nullptr;
 int SSLContext::_ssl_ctx_refcnt = 0;
-
+ClientContext* SSLContext::s_io_ctx = nullptr;
 
 WiFiClientSecure::WiFiClientSecure() {
     ++s_pk_refcnt;
@@ -229,16 +254,21 @@ int WiFiClientSecure::connect(IPAddress ip, uint16_t port) {
     if (!WiFiClient::connect(ip, port))
         return 0;
 
-    return _connectSSL();
+    return _connectSSL(nullptr);
 }
 
 int WiFiClientSecure::connect(const char* name, uint16_t port) {
-    if (!WiFiClient::connect(name, port))
+    IPAddress remote_addr;
+    if (!WiFi.hostByName(name, remote_addr)) {
         return 0;
-    return 1;
+    }
+    if (!WiFiClient::connect(remote_addr, port)) {
+        return 0;
+    }
+    return _connectSSL(name);
 }
 
-int WiFiClientSecure::_connectSSL() {
+int WiFiClientSecure::_connectSSL(const char* hostName) {
     if (_ssl) {
         _ssl->unref();
         _ssl = nullptr;
@@ -246,7 +276,7 @@ int WiFiClientSecure::_connectSSL() {
 
     _ssl = new SSLContext;
     _ssl->ref();
-    _ssl->connect(_client);
+    _ssl->connect(_client, hostName, 5000);
 
     auto status = ssl_handshake_status(*_ssl);
     if (status != SSL_OK) {
@@ -265,6 +295,11 @@ size_t WiFiClientSecure::write(const uint8_t *buf, size_t size) {
     int rc = ssl_write(*_ssl, buf, size);
     if (rc >= 0)
         return rc;
+
+    if (rc != SSL_CLOSE_NOTIFY) {
+        _ssl->unref();
+        _ssl = nullptr;
+    }
 
     return 0;
 }
@@ -302,6 +337,10 @@ size_t WiFiClientSecure::peekBytes(uint8_t *buffer, size_t length) {
         yield();
     }
 
+    if(!_ssl) {
+        return 0;
+    }
+
     if(available() < (int) length) {
         count = available();
     } else {
@@ -318,25 +357,32 @@ int WiFiClientSecure::available() {
     return _ssl->available();
 }
 
+
+/*
+SSL     TCP     RX data     connected
+null    x       x           N
+!null   x       Y           Y
+Y       Y       x           Y
+x       N       N           N
+err     x       N           N
+*/
 uint8_t WiFiClientSecure::connected() {
-    if (!_client)
-        return 0;
-
-    if (_client->state() == ESTABLISHED)
-        return 1;
-
-    if (!_ssl)
-        return 0;
-
-    return _ssl->available() > 0;
+    if (_ssl) {
+        if (_ssl->available()) {
+            return true;
+        }
+        if (_client && _client->state() == ESTABLISHED && _ssl->connected()) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void WiFiClientSecure::stop() {
     if (_ssl) {
-        _ssl->unref();
-        _ssl = nullptr;
+        _ssl->stop();
     }
-    return WiFiClient::stop();
+    WiFiClient::stop();
 }
 
 static bool parseHexNibble(char pb, uint8_t* res) {
@@ -489,10 +535,10 @@ static void clear_certificate() {
 }
 
 extern "C" int ax_port_read(int fd, uint8_t* buffer, size_t count) {
-    ClientContext* _client = reinterpret_cast<ClientContext*>(fd);
-    if (_client->state() != ESTABLISHED && !_client->getSize()) {
-        return -1;
+    ClientContext* _client = SSLContext::getIOContext(fd);
+    if (!_client || _client->state() != ESTABLISHED && !_client->getSize()) {
         errno = EIO;
+        return -1;
     }
     size_t cb = _client->read((char*) buffer, count);
     if (cb != count) {
@@ -506,8 +552,8 @@ extern "C" int ax_port_read(int fd, uint8_t* buffer, size_t count) {
 }
 
 extern "C" int ax_port_write(int fd, uint8_t* buffer, size_t count) {
-    ClientContext* _client = reinterpret_cast<ClientContext*>(fd);
-    if (_client->state() != ESTABLISHED) {
+    ClientContext* _client = SSLContext::getIOContext(fd);
+    if (!_client || _client->state() != ESTABLISHED) {
         errno = EIO;
         return -1;
     }
@@ -560,4 +606,8 @@ extern "C" void* ax_port_realloc(void* ptr, size_t size, const char* file, int l
 
 extern "C" void ax_port_free(void* ptr) {
     free(ptr);
+}
+
+extern "C" void ax_wdt_feed() {
+    optimistic_yield(10000);
 }

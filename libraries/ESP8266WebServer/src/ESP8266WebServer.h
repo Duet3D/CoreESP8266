@@ -25,6 +25,7 @@
 #define ESP8266WEBSERVER_H
 
 #include <functional>
+#include <ESP8266WiFi.h>
 
 enum HTTPMethod { HTTP_ANY, HTTP_GET, HTTP_POST, HTTP_PUT, HTTP_PATCH, HTTP_DELETE, HTTP_OPTIONS };
 enum HTTPUploadStatus { UPLOAD_FILE_START, UPLOAD_FILE_WRITE, UPLOAD_FILE_END,
@@ -34,6 +35,7 @@ enum HTTPClientStatus { HC_NONE, HC_WAIT_READ, HC_WAIT_CLOSE };
 #define HTTP_DOWNLOAD_UNIT_SIZE 1460
 #define HTTP_UPLOAD_BUFLEN 2048
 #define HTTP_MAX_DATA_WAIT 1000 //ms to wait for the client to send the request
+#define HTTP_MAX_POST_WAIT 1000 //ms to wait for POST data to arrive
 #define HTTP_MAX_CLOSE_WAIT 2000 //ms to wait for the client to close the connection
 
 #define CONTENT_LENGTH_UNKNOWN ((size_t) -1)
@@ -66,13 +68,13 @@ public:
 
   void begin();
   void handleClient();
-  
+
   void close();
   void stop();
 
   bool authenticate(const char * username, const char * password);
   void requestAuthentication();
-  
+
   typedef std::function<void(void)> THandlerFunction;
   void on(const char* uri, THandlerFunction handler);
   void on(const char* uri, HTTPMethod method, THandlerFunction fn);
@@ -117,6 +119,8 @@ public:
   void sendContent_P(PGM_P content);
   void sendContent_P(PGM_P content, size_t size);
 
+  static String urlDecode(const String& text);
+
 template<typename T> size_t streamFile(T &file, const String& contentType){
   setContentLength(file.size());
   if (String(file.name()).endsWith(".gz") &&
@@ -133,14 +137,13 @@ protected:
   void _handleRequest();
   bool _parseRequest(WiFiClient& client);
   void _parseArguments(String data);
-  static const char* _responseCodeToString(int code);
+  static String _responseCodeToString(int code);
   bool _parseForm(WiFiClient& client, String boundary, uint32_t len);
   bool _parseFormUploadAborted();
   void _uploadWriteByte(uint8_t b);
   uint8_t _uploadReadByte(WiFiClient& client);
   void _prepareHeader(String& response, int code, const char* content_type, size_t contentLength);
   bool _collectHeader(const char* headerName, const char* headerValue);
-  String urlDecode(const String& text);
 
   struct RequestArgument {
     String key;
