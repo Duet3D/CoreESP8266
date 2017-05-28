@@ -40,6 +40,9 @@
 #include "osapi.h"
 #define EFAULT 14
 
+#undef ICACHE_FLASH_ATTR
+#define ICACHE_FLASH_ATTR
+
 //#define LWIP_PROVIDE_ERRNO
 
 #if (1)
@@ -73,11 +76,12 @@ typedef unsigned long   mem_ptr_t;
 #define PACK_STRUCT_BEGIN
 #define PACK_STRUCT_END
 
-//#define LWIP_DEBUG
+#define LWIP_DEBUG
 
 #ifdef LWIP_DEBUG
+#include <assert.h>
 #define LWIP_PLATFORM_DIAG(x) os_printf x
-#define LWIP_PLATFORM_ASSERT(x) ETS_ASSERT(x)
+#define LWIP_PLATFORM_ASSERT assert
 #else
 #define LWIP_PLATFORM_DIAG(x)
 #define LWIP_PLATFORM_ASSERT(x)
