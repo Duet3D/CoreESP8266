@@ -1431,7 +1431,7 @@ espconn_tcp_server(struct espconn *espconn)
 *******************************************************************************/
 sint8 ICACHE_FLASH_ATTR espconn_tcp_delete(struct espconn *pdeletecon)
 {
-	err_t err;
+	err_t err = ERR_OK;			// DC added initialisation
 	remot_info *pinfo = NULL;
 	espconn_msg *pdelete_msg = NULL;
 	struct tcp_pcb *pcb = NULL;

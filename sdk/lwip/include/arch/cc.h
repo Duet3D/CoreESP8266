@@ -61,13 +61,22 @@ typedef signed     long    s32_t;
 typedef unsigned long   mem_ptr_t;
 
 #define S16_F "d"
-#define U16_F "d"
+#define U16_F "u"
 #define X16_F "x"
 
+#ifdef ESP8266
+
+#define S32_F "ld"
+#define U32_F "lu"
+#define X32_F "lx"
+
+#else
+
 #define S32_F "d"
-#define U32_F "d"
+#define U32_F "u"
 #define X32_F "x"
 
+#endif
 
 
 //#define PACK_STRUCT_FIELD(x) x __attribute__((packed))

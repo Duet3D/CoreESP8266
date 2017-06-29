@@ -717,6 +717,7 @@ sint8 ICACHE_FLASH_ATTR espconn_tcp_set_buf_count(struct espconn *espconn, uint8
 
 	if (plist == NULL)
 		return ESPCONN_ARG;
+	return ESPCONN_OK;			// DC added - not sure this is right, but the callers don't check the return code anyway
 }
 
 /******************************************************************************
