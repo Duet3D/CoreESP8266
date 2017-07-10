@@ -39,13 +39,24 @@ public:
   uint8_t * getDataPtr();
 
   template<typename T> 
-  T &get(int address, T &t) {
+  T &get(int address, T &t) const {
     if (address < 0 || address + sizeof(T) > _size)
       return t;
 
     memcpy((uint8_t*) &t, _data + address, sizeof(T));
     return t;
   }
+
+#if 1	// DC added
+	template<typename T> const T *getPtr(int address) const
+	{
+	    if (address < 0 || address + sizeof(T) > _size)
+	    {
+	    	return nullptr;
+	    }
+		return reinterpret_cast<const T*>(_data + address);
+	}
+#endif
 
   template<typename T> 
   const T &put(int address, const T &t) {
