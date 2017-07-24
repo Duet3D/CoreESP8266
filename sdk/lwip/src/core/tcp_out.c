@@ -448,7 +448,11 @@ tcp_write(struct tcp_pcb *pcb, const void *arg, u16_t len, u8_t apiflags)
     if (oversize > 0) {
       LWIP_ASSERT("inconsistent oversize vs. space", oversize_used <= space);
       seg = last_unsent;
+#if 1	// DC patch, see http://savannah.nongnu.org/bugs/?func=detailitem&item_id=46384
+      oversize_used = LWIP_MIN(space, LWIP_MIN(oversize, len));
+#else
       oversize_used = oversize < len ? oversize : len;
+#endif
       pos += oversize_used;
       oversize -= oversize_used;
       space -= oversize_used;
@@ -919,7 +923,11 @@ tcp_output(struct tcp_pcb *pcb)
    *
    * If data is to be sent, we will just piggyback the ACK (see below).
    */
+#if 1	//DC
+  if ((pcb->flags & TF_ACK_NOW) &&
+#else
   if (pcb->flags & TF_ACK_NOW &&
+#endif
      (seg == NULL ||
       ntohl(seg->tcphdr->seqno) - pcb->lastack + seg->len > wnd)) {
      return tcp_send_empty_ack(pcb);//����ֻ��ACK�ı��Ķ�
