@@ -17,8 +17,9 @@
  */
 
 #include <time.h>
+#include <sys/time.h>
+#include <sys/reent.h>
 #include "sntp.h"
-
 
 #ifndef _TIMEVAL_DEFINED
 #define _TIMEVAL_DEFINED
@@ -30,23 +31,25 @@ struct timeval {
 
 extern char* sntp_asctime(const struct tm *t);
 extern struct tm* sntp_localtime(const time_t *clock);
+extern uint64_t micros64();
 
 // time gap in seconds from 01.01.1900 (NTP time) to 01.01.1970 (UNIX time)
 #define DIFF1900TO1970 2208988800UL
 
-static int s_daylightOffset_sec = 0;
-static long s_timezone_sec = 0;
-static time_t s_bootTime = 0;
+bool s_bootTimeSet = false;
+static uint64_t s_bootTime_us = 0;
 
 // calculate offset used in gettimeofday
 static void ensureBootTimeIsSet()
 {
-    if (!s_bootTime)
+    // Check just a bool flag instead of the full 64-bit s_bootTime for zero.
+    if (!s_bootTimeSet)
     {
-        time_t now = sntp_get_current_timestamp();
-        if (now)
+        time_t now_s = sntp_get_current_timestamp();
+        if (now_s)
         {
-            s_bootTime =  now - millis() / 1000;
+            s_bootTime_us = now_s * 1000000ULL - micros64();
+            s_bootTimeSet = true;
         }
     }
 }
@@ -68,25 +71,18 @@ void configTime(int timezone, int daylightOffset_sec, const char* server1, const
     setServer(1, server2);
     setServer(2, server3);
 
-    s_timezone_sec = timezone;
-    s_daylightOffset_sec = daylightOffset_sec;
     sntp_set_timezone(timezone/3600);
+    sntp_set_daylight(daylightOffset_sec);
     sntp_init();
 }
 
 int clock_gettime(clockid_t unused, struct timespec *tp)
 {
-    tp->tv_sec  = millis() / 1000;
-    tp->tv_nsec = micros() * 1000;
+    (void) unused;
+    uint64_t m = micros64();
+    tp->tv_sec = m / 1000000;
+    tp->tv_nsec = (m % 1000000) * 1000;
     return 0;
-}
-
-// seconds since 1970
-time_t mktime(struct tm *t)
-{
-    // system_mktime expects month in range 1..12
-    #define START_MONTH 1
-    return DIFF1900TO1970 + system_mktime(t->tm_year, t->tm_mon + START_MONTH, t->tm_mday, t->tm_hour, t->tm_min, t->tm_sec);
 }
 
 time_t time(time_t * t)
@@ -99,30 +95,16 @@ time_t time(time_t * t)
     return seconds;
 }
 
-char* asctime(const struct tm *t)
+int _gettimeofday_r(struct _reent* unused, struct timeval *tp, void *tzp)
 {
-    return sntp_asctime(t);
-}
-
-struct tm* localtime(const time_t *clock)
-{
-    return sntp_localtime(clock);
-}
-
-char* ctime(const time_t *t)
-{
-    struct tm* p_tm = localtime(t);
-    char* result = asctime(p_tm);
-    return result;
-}
-
-int gettimeofday(struct timeval *tp, void *tzp)
-{
+    (void) unused;
+    (void) tzp;
     if (tp)
     {
         ensureBootTimeIsSet();
-        tp->tv_sec  = (s_bootTime + millis()) / 1000;
-        tp->tv_usec = micros() * 1000;
+        uint64_t currentTime_us = s_bootTime_us + micros64();
+        tp->tv_sec = currentTime_us / 1000000ULL;
+        tp->tv_usec = currentTime_us % 1000000ULL;
     }
     return 0;
 }

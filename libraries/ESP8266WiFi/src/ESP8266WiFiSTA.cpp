@@ -36,6 +36,7 @@ extern "C" {
 #include "smartconfig.h"
 #include "lwip/err.h"
 #include "lwip/dns.h"
+#include "lwip/init.h" // LWIP_VERSION_
 }
 
 #include "debug.h"
@@ -194,6 +195,15 @@ wl_status_t ESP8266WiFiSTAClass::begin() {
     return status();
 }
 
+#if 0	// chrishamm: not used
+static void
+swap(IPAddress &lhs, IPAddress &rhs)
+{
+  IPAddress tmp = lhs;
+  lhs = rhs;
+  rhs = tmp;
+}
+#endif
 
 /**
  * Change IP configuration settings disabling the dhcp client
@@ -208,6 +218,24 @@ bool ESP8266WiFiSTAClass::config(IPAddress local_ip, IPAddress gateway, IPAddres
     if(!WiFi.enableSTA(true)) {
         return false;
     }
+
+#if 0	// chrishamm: This is obsolete
+    //Arduino has a different arg order: ip, dns, gateway, subnet. To allow compatibility, check first octet of 3rd arg. If 255, interpret as ESP order, otherwise Arduino order.
+    if(subnet[0] != 255)
+    {
+      //octet is not 255 => interpret as Arduino order
+
+      if(dns1[0] == 0)
+      {
+        //arg order is arduino and 4th arg not given => assign it arduino default
+        dns1 = IPAddress(255,255,255,0);
+      }
+
+      //current order is arduino:                   ip-dns-gway-subnet
+      swap(gateway, subnet); //after this, order is ip-gway-dns-subnet
+      swap(subnet, dns1);    //after this, order is ip-gway-subnet-dns (correct ESP order)
+    } 
+#endif
 
     struct ip_info info;
     info.ip.addr = static_cast<uint32_t>(local_ip);
@@ -226,6 +254,7 @@ bool ESP8266WiFiSTAClass::config(IPAddress local_ip, IPAddress gateway, IPAddres
     } else {
         return false;
     }
+#if LWIP_DNS
     ip_addr_t d;
 
     if(dns1 != (uint32_t)0x00000000) {
@@ -239,6 +268,7 @@ bool ESP8266WiFiSTAClass::config(IPAddress local_ip, IPAddress gateway, IPAddres
         d.addr = static_cast<uint32_t>(dns2);
         dns_setserver(1, &d);
     }
+#endif
 
     return true;
 }
@@ -400,8 +430,17 @@ IPAddress ESP8266WiFiSTAClass::gatewayIP() {
  * @return IPAddress DNS Server IP
  */
 IPAddress ESP8266WiFiSTAClass::dnsIP(uint8_t dns_no) {
+#if LWIP_DNS
+# if LWIP_VERSION_MAJOR == 1
     ip_addr_t dns_ip = dns_getserver(dns_no);
     return IPAddress(dns_ip.addr);
+# else
+    const ip_addr_t* dns_ip = dns_getserver(dns_no);
+    return IPAddress(dns_ip->addr);
+# endif
+#else
+    return IPAddress();
+#endif
 }
 
 
@@ -590,6 +629,12 @@ void wifi_wps_status_cb(wps_cb_status status) {
         case WPS_CB_ST_WEP:
             DEBUGV("wps WEP\n");
             break;
+        case WPS_CB_ST_UNK:
+            DEBUGV("wps UNKNOWN\n");
+            if(!wifi_wps_disable()) {
+                DEBUGV("wps disable failed\n");
+            }
+            break;
     }
     // TODO user function to get status
 
@@ -670,4 +715,3 @@ void ESP8266WiFiSTAClass::_smartConfigCallback(uint32_t st, void* result) {
         WiFi.stopSmartConfig();
     }
 }
-

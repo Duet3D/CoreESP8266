@@ -66,6 +66,15 @@ static bool softap_config_equal(const softap_config& lhs, const softap_config& r
     if(lhs.ssid_hidden != rhs.ssid_hidden) {
         return false;
     }
+    if(lhs.max_connection != rhs.max_connection) {
+        return false;
+    }
+    if(lhs.beacon_interval != rhs.beacon_interval) {
+        return false;
+    }
+    if(lhs.authmode != rhs.authmode) {
+        return false;
+    }
     return true;
 }
 
@@ -76,12 +85,13 @@ static bool softap_config_equal(const softap_config& lhs, const softap_config& r
 
 /**
  * Set up an access point
- * @param ssid          Pointer to the SSID (max 63 char).
- * @param passphrase    (for WPA2 min 8 char, for open use NULL)
- * @param channel       WiFi channel number, 1 - 13.
- * @param ssid_hidden   Network cloaking (0 = broadcast SSID, 1 = hide SSID)
+ * @param ssid              Pointer to the SSID (max 63 char).
+ * @param passphrase        (for WPA2 min 8 char, for open use NULL)
+ * @param channel           WiFi channel number, 1 - 13.
+ * @param ssid_hidden       Network cloaking (0 = broadcast SSID, 1 = hide SSID)
+ * @param max_connection    Max simultaneous connected clients, 1 - 4.
  */
-bool ESP8266WiFiAPClass::softAP(const char* ssid, const char* passphrase, int channel, int ssid_hidden) {
+bool ESP8266WiFiAPClass::softAP(const char* ssid, const char* passphrase, int channel, int ssid_hidden, int max_connection) {
 
     if(!WiFi.enableAP(true)) {
         // enable AP failed
@@ -108,7 +118,7 @@ bool ESP8266WiFiAPClass::softAP(const char* ssid, const char* passphrase, int ch
     conf.channel = channel;
     conf.ssid_len = strlen(ssid);
     conf.ssid_hidden = ssid_hidden;
-    conf.max_connection = 4;
+    conf.max_connection = max_connection;
     conf.beacon_interval = 100;
 
     if(!passphrase || strlen(passphrase) == 0) {
@@ -261,6 +271,7 @@ bool ESP8266WiFiAPClass::softAPdisconnect(bool wifioff) {
     struct softap_config conf;
     *conf.ssid = 0;
     *conf.password = 0;
+    conf.authmode = AUTH_OPEN;
     ETS_UART_INTR_DISABLE();
     if(WiFi._persistent) {
         ret = wifi_softap_set_config(&conf);
@@ -273,7 +284,7 @@ bool ESP8266WiFiAPClass::softAPdisconnect(bool wifioff) {
         DEBUG_WIFI("[APdisconnect] set_config failed!\n");
     }
 
-    if(wifioff) {
+    if(ret && wifioff) {
         ret = WiFi.enableAP(false);
     }
 

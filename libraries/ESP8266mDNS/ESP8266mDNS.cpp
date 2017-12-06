@@ -57,7 +57,7 @@ extern "C" {
 #include "lwip/mem.h"
 #include "include/UdpContext.h"
 
-
+#if LWIP_VERSION_MAJOR != 2		// chrishamm: Don't build the Arduino mDNS responder if using LwIP 2
 
 //#define MDNS_DEBUG_ERR
 //#define MDNS_DEBUG_TX
@@ -1213,4 +1213,6 @@ void MDNSResponder::_replyToInstanceRequest(uint8_t questionMask, uint8_t respon
 
 #if !defined(NO_GLOBAL_INSTANCES) && !defined(NO_GLOBAL_MDNS)
 MDNSResponder MDNS;
+#endif
+
 #endif

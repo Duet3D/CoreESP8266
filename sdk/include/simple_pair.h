@@ -22,35 +22,43 @@
  *
  */
 
-#ifndef __PING_H__
-#define __PING_H__
+#ifndef __SIMPLE_PAIR_H__
+#define __SIMPLE_PAIR_H__
+
+typedef enum {
+	SP_ST_STA_FINISH = 0,
+	SP_ST_AP_FINISH = 0,
+	SP_ST_AP_RECV_NEG,
+	SP_ST_STA_AP_REFUSE_NEG,
+	/* all following is err */
+	SP_ST_WAIT_TIMEOUT,
+	SP_ST_SEND_ERROR,
+	SP_ST_KEY_INSTALL_ERR,
+	SP_ST_KEY_OVERLAP_ERR,  //means the same macaddr has two different keys 
+	SP_ST_OP_ERROR,
+	SP_ST_UNKNOWN_ERROR,
+	SP_ST_MAX,
+} SP_ST_t;
 
 
-typedef void (* ping_recv_function)(void* arg, void *pdata);
-typedef void (* ping_sent_function)(void* arg, void *pdata);
+typedef void (*simple_pair_status_cb_t)(u8 *sa, u8 status);
 
-struct ping_option{
-	uint32 count;
-	uint32 ip;
-	uint32 coarse_time;
-	ping_recv_function recv_function;
-	ping_sent_function sent_function;
-	void* reverse;
-};
+int register_simple_pair_status_cb(simple_pair_status_cb_t cb);
+void unregister_simple_pair_status_cb(void);
 
-struct ping_resp{
-	uint32 total_count;
-	uint32 resp_time;
-	uint32 seqno;
-	uint32 timeout_count;
-	uint32 bytes;
-	uint32 total_bytes;
-	uint32 total_time;
-	sint8  ping_err;
-};
+int simple_pair_init(void);
+void simple_pair_deinit(void);
 
-bool ping_start(struct ping_option *ping_opt);
-bool ping_regist_recv(struct ping_option *ping_opt, ping_recv_function ping_recv);
-bool ping_regist_sent(struct ping_option *ping_opt, ping_sent_function ping_sent);
+int simple_pair_state_reset(void);
+int simple_pair_ap_enter_announce_mode(void);
+int simple_pair_sta_enter_scan_mode(void);
 
-#endif /* __PING_H__ */
+int simple_pair_sta_start_negotiate(void);
+int simple_pair_ap_start_negotiate(void);
+int simple_pair_ap_refuse_negotiate(void);
+
+int simple_pair_set_peer_ref(u8 *peer_mac, u8 *tmp_key, u8 *ex_key);
+int simple_pair_get_peer_ref(u8 *peer_mac, u8 *tmp_key, u8 *ex_key);
+
+
+#endif /* __SIMPLE_PAIR_H__ */
