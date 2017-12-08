@@ -46,19 +46,13 @@ public:
   uint8_t status();
   virtual int connect(IPAddress ip, uint16_t port);
   virtual int connect(const char *host, uint16_t port);
-#if 1	//dc42
-  virtual size_t write(uint8_t b) { return write(b, true); }
-  size_t write(uint8_t, bool last);
-  virtual size_t write(const uint8_t *buf, size_t size) { return write(buf, size, true); }
-  size_t write(const uint8_t *buf, size_t size, bool last);
-  size_t write_P(PGM_P buf, size_t size, bool last);
-#else
   virtual size_t write(uint8_t);
   virtual size_t write(const uint8_t *buf, size_t size);
   size_t write_P(PGM_P buf, size_t size);
-#endif
-  template <typename T>
-  size_t write(T& source, size_t unitSize);
+  size_t write(Stream& stream);
+
+  // This one is deprecated, use write(Stream& instead)
+  size_t write(Stream& stream, size_t unitSize) __attribute__ ((deprecated));
 
   virtual int available();
   virtual int read();
@@ -81,35 +75,7 @@ public:
   void setNoDelay(bool nodelay);
   static void setLocalPortStart(uint16_t port) { _localPort = port; }
 
-  template<typename T> size_t write(T &src){
-    uint8_t obuf[WIFICLIENT_MAX_PACKET_SIZE];
-    size_t doneLen = 0;
-    size_t sentLen;
-    int i;
-
-    while (src.available() > WIFICLIENT_MAX_PACKET_SIZE){
-      src.read(obuf, WIFICLIENT_MAX_PACKET_SIZE);
-#if 1	//dc42
-      sentLen = write(obuf, WIFICLIENT_MAX_PACKET_SIZE, false);
-#else
-      sentLen = write(obuf, WIFICLIENT_MAX_PACKET_SIZE);
-#endif
-      doneLen = doneLen + sentLen;
-      if(sentLen != WIFICLIENT_MAX_PACKET_SIZE){
-        return doneLen;
-      }
-    }
-
-    uint16_t leftLen = src.available();
-    src.read(obuf, leftLen);
-#if 1	//dc42
-    sentLen = write(obuf, leftLen, true);
-#else
-    sentLen = write(obuf, leftLen);
-#endif
-    doneLen = doneLen + sentLen;
-    return doneLen;
-  }
+  size_t availableForWrite();
 
   friend class WiFiServer;
 
@@ -129,29 +95,5 @@ protected:
   ClientContext* _client;
   static uint16_t _localPort;
 };
-
-
-template <typename T>
-inline size_t WiFiClient::write(T& source, size_t unitSize) {
-  std::unique_ptr<uint8_t[]> buffer(new uint8_t[unitSize]);
-  size_t size_sent = 0;
-  while(true) {
-    size_t left = source.available();
-    if (!left)
-      break;
-    size_t will_send = (left < unitSize) ? left : unitSize;
-    source.read(buffer.get(), will_send);
-#if 1	//dc42
-    size_t cb = write(buffer.get(), will_send, will_send == left);
-#else
-    size_t cb = write(buffer.get(), will_send);
-#endif
-    size_sent += cb;
-    if (cb != will_send) {
-      break;
-    }
-  }
-  return size_sent;
-}
 
 #endif

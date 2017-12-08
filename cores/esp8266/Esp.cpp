@@ -83,6 +83,7 @@ EspClass ESP;
 
 void EspClass::wdtEnable(uint32_t timeout_ms)
 {
+    (void) timeout_ms;
     /// This API can only be called if software watchdog is stopped
     system_soft_wdt_restart();
 }
@@ -249,12 +250,10 @@ uint32_t EspClass::magicFlashChipSize(uint8_t byte) {
             return (2_MB);
         case 0x4: // 32 MBit (4MB)
             return (4_MB);
-        case 0x5: // 64 MBit (8MB)
+        case 0x8: // 64 MBit (8MB)
             return (8_MB);
-        case 0x6: // 128 MBit (16MB)
+        case 0x9: // 128 MBit (16MB)
             return (16_MB);
-        case 0x7: // 256 MBit (32MB)
-            return (32_MB);
         default: // fail?
             return 0;
     }
@@ -363,19 +362,19 @@ bool EspClass::checkFlashConfig(bool needsEquals) {
 
 String EspClass::getResetReason(void) {
     char buff[32];
-    if (resetInfo.reason == REASON_DEFAULT_RST) { // normal startup by power on 
+    if (resetInfo.reason == REASON_DEFAULT_RST) { // normal startup by power on
       strcpy_P(buff, PSTR("Power on"));
     } else if (resetInfo.reason == REASON_WDT_RST) { // hardware watch dog reset
       strcpy_P(buff, PSTR("Hardware Watchdog"));
-    } else if (resetInfo.reason == REASON_EXCEPTION_RST) { // exception reset, GPIO status won’t change 
+    } else if (resetInfo.reason == REASON_EXCEPTION_RST) { // exception reset, GPIO status won’t change
       strcpy_P(buff, PSTR("Exception"));
-    } else if (resetInfo.reason == REASON_SOFT_WDT_RST) { // software watch dog reset, GPIO status won’t change 
+    } else if (resetInfo.reason == REASON_SOFT_WDT_RST) { // software watch dog reset, GPIO status won’t change
       strcpy_P(buff, PSTR("Software Watchdog"));
-    } else if (resetInfo.reason == REASON_SOFT_RESTART) { // software restart ,system_restart , GPIO status won’t change 
+    } else if (resetInfo.reason == REASON_SOFT_RESTART) { // software restart ,system_restart , GPIO status won’t change
       strcpy_P(buff, PSTR("Software/System restart"));
-    } else if (resetInfo.reason == REASON_DEEP_SLEEP_AWAKE) { // wake up from deep-sleep 
+    } else if (resetInfo.reason == REASON_DEEP_SLEEP_AWAKE) { // wake up from deep-sleep
       strcpy_P(buff, PSTR("Deep-Sleep Wake"));
-    } else if (resetInfo.reason == REASON_EXT_SYS_RST) { // external system reset 
+    } else if (resetInfo.reason == REASON_EXT_SYS_RST) { // external system reset
       strcpy_P(buff, PSTR("External System"));
     } else {
       strcpy_P(buff, PSTR("Unknown"));
@@ -397,23 +396,19 @@ struct rst_info * EspClass::getResetInfoPtr(void) {
 }
 
 bool EspClass::eraseConfig(void) {
+#if 0	//dc42
     bool ret = true;
-    size_t cfgAddr = (ESP.getFlashChipSize() - 0x4000);
-    size_t cfgSize = (8*1024);
+#endif
+    const size_t cfgSize = 0x4000;
+    size_t cfgAddr = ESP.getFlashChipSize() - cfgSize;
 
-    noInterrupts();
-    while(cfgSize) {
-
-        if(spi_flash_erase_sector((cfgAddr / SPI_FLASH_SEC_SIZE)) != SPI_FLASH_RESULT_OK) {
-            ret = false;
+    for (size_t offset = 0; offset < cfgSize; offset += SPI_FLASH_SEC_SIZE) {
+        if (!flashEraseSector((cfgAddr + offset) / SPI_FLASH_SEC_SIZE)) {
+            return false;
         }
-
-        cfgSize -= SPI_FLASH_SEC_SIZE;
-        cfgAddr += SPI_FLASH_SEC_SIZE;
     }
-    interrupts();
 
-    return ret;
+    return true;
 }
 
 uint32_t EspClass::getSketchSize() {
@@ -434,7 +429,7 @@ uint32_t EspClass::getSketchSize() {
         section_index < image_header.num_segments;
         ++section_index)
     {
-        section_header_t section_header = {0};
+        section_header_t section_header = {0, 0};
         if (spi_flash_read(pos, (uint32_t*) &section_header, sizeof(section_header))) {
             return 0;
         }
@@ -548,5 +543,4 @@ String EspClass::getSketchMD5()
     md5.calculate();
     result = md5.toString();
     return result;
-} 
-
+}

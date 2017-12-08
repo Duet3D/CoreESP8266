@@ -14,7 +14,7 @@ static scheduled_fn_t* sLastUnused = 0;
 
 static int sCount = 0;
 
-#if 0	// dc42 - this function is unused
+static void init_lists() __attribute__((unused));
 static void init_lists()
 {
     if (sCount != 0) {
@@ -33,7 +33,6 @@ static void init_lists()
     }
     sLastUnused->mNext = NULL;
 }
-#endif
 
 static scheduled_fn_t* get_fn() {
     scheduled_fn_t* result = NULL;

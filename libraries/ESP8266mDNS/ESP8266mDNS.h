@@ -79,8 +79,10 @@ public:
   void addService(String service, String proto, uint16_t port){
     addService(service.c_str(), proto.c_str(), port);
   }
-  
+
+#if 1	// duet3d
   void deleteServices();
+#endif
 
   bool addServiceTxt(char *name, char *proto, char * key, char * value);
   void addServiceTxt(const char *name, const char *proto, const char *key,const char * value){

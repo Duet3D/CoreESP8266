@@ -36,6 +36,7 @@ extern "C" {
 #include "smartconfig.h"
 #include "lwip/err.h"
 #include "lwip/dns.h"
+#include "lwip/init.h" // LWIP_VERSION_
 }
 
 #include "debug.h"
@@ -400,8 +401,13 @@ IPAddress ESP8266WiFiSTAClass::gatewayIP() {
  * @return IPAddress DNS Server IP
  */
 IPAddress ESP8266WiFiSTAClass::dnsIP(uint8_t dns_no) {
+#if LWIP_VERSION_MAJOR == 1
     ip_addr_t dns_ip = dns_getserver(dns_no);
     return IPAddress(dns_ip.addr);
+#else
+    const ip_addr_t* dns_ip = dns_getserver(dns_no);
+    return IPAddress(dns_ip->addr);
+#endif
 }
 
 
@@ -590,6 +596,12 @@ void wifi_wps_status_cb(wps_cb_status status) {
         case WPS_CB_ST_WEP:
             DEBUGV("wps WEP\n");
             break;
+        case WPS_CB_ST_UNK:
+            DEBUGV("wps UNKNOWN\n");
+            if(!wifi_wps_disable()) {
+                DEBUGV("wps disable failed\n");
+            }
+            break;
     }
     // TODO user function to get status
 
@@ -670,4 +682,3 @@ void ESP8266WiFiSTAClass::_smartConfigCallback(uint32_t st, void* result) {
         WiFi.stopSmartConfig();
     }
 }
-

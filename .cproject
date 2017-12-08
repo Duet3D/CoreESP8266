@@ -34,7 +34,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/cores/esp8266}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/variants/nodemcu}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/sdk/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/sdk/lwip/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/LwipESP8266/src/include}&quot;"/>
 								</option>
 								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1831141146" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="__ets__"/>
@@ -44,7 +44,6 @@
 									<listOptionValue builtIn="false" value="ARDUINO_ESP8266_ESP12"/>
 									<listOptionValue builtIn="false" value="ARDUINO_ARCH_ESP8266"/>
 									<listOptionValue builtIn="false" value="ESP8266"/>
-									<listOptionValue builtIn="false" value="LWIP_OPEN_SRC"/>
 								</option>
 								<option id="gnu.c.compiler.option.preprocessor.undef.symbol.1627360198" name="Undefined symbols (-U)" superClass="gnu.c.compiler.option.preprocessor.undef.symbol" useByScannerDiscovery="false"/>
 								<option id="gnu.c.compiler.option.misc.other.1766440418" name="Other flags" superClass="gnu.c.compiler.option.misc.other" useByScannerDiscovery="false" value="-c -Wpointer-arith -Wno-implicit-function-declaration -Wl,-EL -fno-inline-functions -nostdlib -mlongcalls -mtext-section-literals -falign-functions=4 -ffunction-sections -fdata-sections" valueType="string"/>
@@ -60,7 +59,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/libraries/ESP8266WiFi/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/libraries/ESP8266mDNS}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/sdk/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/sdk/lwip/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/LwipESP8266/src/include}&quot;"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.dialect.std.12077825" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.586651388" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
@@ -71,7 +70,6 @@
 									<listOptionValue builtIn="false" value="ARDUINO_ESP8266_ESP12"/>
 									<listOptionValue builtIn="false" value="ARDUINO_ARCH_ESP8266"/>
 									<listOptionValue builtIn="false" value="ESP8266"/>
-									<listOptionValue builtIn="false" value="LWIP_OPEN_SRC"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.preprocessor.undef.497955145" name="Undefined symbols (-U)" superClass="gnu.cpp.compiler.option.preprocessor.undef" useByScannerDiscovery="false"/>
 								<option id="gnu.cpp.compiler.option.other.other.798476785" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -mlongcalls -mtext-section-literals -fno-exceptions -fno-rtti -falign-functions=4 -ffunction-sections -fdata-sections" valueType="string"/>
@@ -87,12 +85,25 @@
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.cross.archiver.1924612385" name="Cross GCC Archiver" superClass="cdt.managedbuild.tool.gnu.cross.archiver"/>
 							<tool id="cdt.managedbuild.tool.gnu.cross.assembler.165799323" name="Cross GCC Assembler" superClass="cdt.managedbuild.tool.gnu.cross.assembler">
+								<option id="gnu.both.asm.option.flags.582770910" name="Assembler flags" superClass="gnu.both.asm.option.flags" useByScannerDiscovery="false" value="--text-section-literals" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.541636880" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<folderInfo id="cdt.managedbuild.config.gnu.cross.exe.release.287496342.1533728049" name="/" resourcePath="sdk/lwip_unused">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.cross.exe.release.1023261208" name="Cross GCC" superClass="cdt.managedbuild.toolchain.gnu.cross.exe.release" unusedChildren="">
+							<option id="cdt.managedbuild.option.gnu.cross.prefix.1519978973.1961097224" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix.1519978973"/>
+							<option id="cdt.managedbuild.option.gnu.cross.path.2120194557.358325448" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path.2120194557"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.1117264835" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler.572116206"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.compiler.682602836" name="Cross G++ Compiler" superClass="cdt.managedbuild.tool.gnu.cross.cpp.compiler.1744532160"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.c.linker.205076005" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker.456516233"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.linker.936147217" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker.467590668"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.archiver.616303446" name="Cross GCC Archiver" superClass="cdt.managedbuild.tool.gnu.cross.archiver.1924612385"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.assembler.577883134" name="Cross GCC Assembler" superClass="cdt.managedbuild.tool.gnu.cross.assembler.165799323"/>
+						</toolChain>
+					</folderInfo>
 					<sourceEntries>
-						<entry excluding="libraries/Wire|libraries/GDBStub|variants/generic|variants/espresso_lite_v1|variants/espinotee|variants/espino|variants/ESPDuino|variants/d1_mini|variants/d1|variants/adafruit" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="sdk/lwip_unused|libraries/Wire|variants/generic|variants/espinotee|variants/ESPDuino|variants/d1|variants/adafruit|libraries/GDBStub|variants/espresso_lite_v1|variants/d1_mini|variants/espino" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
