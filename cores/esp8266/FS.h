@@ -64,6 +64,9 @@ public:
     }
     size_t read(uint8_t* buf, size_t size);
     bool seek(uint32_t pos, SeekMode mode);
+    bool seek(uint32_t pos) {
+        return seek(pos, SeekSet);
+    }
     size_t position() const;
     size_t size() const;
     void close();
@@ -139,6 +142,8 @@ using fs::SeekEnd;
 using fs::FSInfo;
 #endif //FS_NO_GLOBALS
 
+#if !defined(NO_GLOBAL_INSTANCES) && !defined(NO_GLOBAL_SPIFFS)
 extern fs::FS SPIFFS;
+#endif
 
 #endif //FS_H

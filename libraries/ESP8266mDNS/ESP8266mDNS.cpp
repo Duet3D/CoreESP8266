@@ -187,9 +187,9 @@ void MDNSResponder::_restart() {
 bool MDNSResponder::_listen() {
   // Open the MDNS socket if it isn't already open.
   if (!_conn) {
-    #ifdef MDNS_DEBUG_RX
+#ifdef MDNS_DEBUG_RX
     Serial.println("MDNS listening");
-    #endif
+#endif
     ip_addr_t multicast_addr;
     multicast_addr.addr = (uint32_t) MDNS_MULTICAST_ADDR;
 
@@ -279,6 +279,8 @@ void MDNSResponder::addService(char *name, char *proto, uint16_t port){
   
 }
 
+#if 1	// duet3d
+
 void MDNSResponder::deleteServices()
 {
 	for (MDNSService *ptr = _services; ptr != nullptr; )
@@ -295,6 +297,8 @@ void MDNSResponder::deleteServices()
 	}
 	_services = nullptr;
 }
+
+#endif
 
 int MDNSResponder::queryService(char *service, char *proto) {
 #ifdef MDNS_DEBUG_TX
@@ -1216,3 +1220,5 @@ MDNSResponder MDNS;
 #endif
 
 #endif
+
+// End

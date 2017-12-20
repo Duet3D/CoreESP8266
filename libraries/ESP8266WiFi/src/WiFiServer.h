@@ -24,7 +24,9 @@
 
 extern "C" {
   #include "include/wl_definitions.h"
-  #include "lwip/err.h"
+#if 1	//dc42
+  #include "lwip/err.h"			// for err_t
+#endif
 
   struct tcp_pcb;
 }
@@ -63,10 +65,18 @@ public:
   using Print::write;
 
 protected:
+#if 1	// dc42
   err_t _accept(tcp_pcb* newpcb, err_t err);
+#else
+  long _accept(tcp_pcb* newpcb, long err);
+#endif
   void   _discard(ClientContext* client);
 
+#if 1	// dc42
   static err_t _s_accept(void *arg, tcp_pcb* newpcb, err_t err);
+#else
+  static long _s_accept(void *arg, tcp_pcb* newpcb, long err);
+#endif
   static void _s_discard(void* server, ClientContext* ctx);
 };
 

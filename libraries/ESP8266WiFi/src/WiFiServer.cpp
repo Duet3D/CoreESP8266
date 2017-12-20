@@ -151,7 +151,11 @@ T* slist_append_tail(T* head, T* item) {
     return head;
 }
 
+#if 1	// dc42
 err_t WiFiServer::_accept(tcp_pcb* apcb, err_t err) {
+#else
+long WiFiServer::_accept(tcp_pcb* apcb, long err) {
+#endif
     (void) err;
     DEBUGV("WS:ac\r\n");
     ClientContext* client = new ClientContext(apcb, &WiFiServer::_s_discard, this);
@@ -166,7 +170,11 @@ void WiFiServer::_discard(ClientContext* client) {
     DEBUGV("WS:dis\r\n");
 }
 
+#if 1	// dc42
 err_t WiFiServer::_s_accept(void *arg, tcp_pcb* newpcb, err_t err) {
+#else
+long WiFiServer::_s_accept(void *arg, tcp_pcb* newpcb, long err) {
+#endif
     return reinterpret_cast<WiFiServer*>(arg)->_accept(newpcb, err);
 }
 

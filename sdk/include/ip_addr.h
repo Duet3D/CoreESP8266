@@ -27,6 +27,8 @@
 
 #include "c_types.h"
 
+#if 0	// dc42 - this clashes with the identical declaration in lwip
+
 struct ip_addr {
     uint32 addr;
 };
@@ -38,6 +40,8 @@ struct ip_info {
     struct ip_addr netmask;
     struct ip_addr gw;
 };
+
+#endif
 
 /**
  * Determine if two address are on the same network.

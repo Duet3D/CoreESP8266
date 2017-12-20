@@ -41,7 +41,11 @@
 #include <osapi.h>
 #include <os_type.h>
 
+#if 1
+// dc42 see later
+#else
 extern bool s_bootTimeSet;
+#endif
 
 #if LWIP_VERSION_MAJOR == 1
 
@@ -445,7 +449,11 @@ int settimeofday(const struct timeval* tv, const struct timezone* tz)
         // XXX FIXME TODO: efficiently use provided tv->tv_sec
         
         // reset time subsystem
+#if 1
+        // dc42 - s_bootTimeSet isn't defined anywhere
+#else
         s_bootTimeSet = false;
+#endif
     }
     return 0;
 }
