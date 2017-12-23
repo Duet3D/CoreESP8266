@@ -156,10 +156,15 @@ void init_done() {
 
 
 extern "C" void user_init(void) {
+#if 1	// dc42
+	// Getting reset info here doesn't seem to return the correct data, so we don't bother
+    // Also we leave the UART baud rate set to 74880 so that the Duet can read both the startup messages and any subsequent messages
+#else
     struct rst_info *rtc_info_ptr = system_get_rst_info();
     memcpy((void *) &resetInfo, (void *) rtc_info_ptr, sizeof(resetInfo));
 
     uart_div_modify(0, UART_CLK_FREQ / (115200));
+#endif
 
     init();
 

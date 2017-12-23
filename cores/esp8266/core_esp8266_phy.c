@@ -220,7 +220,7 @@ static const uint8_t ICACHE_FLASH_ATTR phy_init_data[128] =
     // getVcc function (system_get_vdd33):
     // is only available when TOUT pin17 is suspended (floating), this function measure the power voltage of VDD3P3 pin 3 and 4
     // For this function the vdd33_const must be set to 255 (0xFF).
-    [107] = 33,
+    [107] = 255,
 
     // disable RF calibration for certain number of times
     [108] = 0,
@@ -248,7 +248,7 @@ static const uint8_t ICACHE_FLASH_ATTR phy_init_data[128] =
     [114] = 1
 };
 
-// These functions will be overriden from C++ code.
+// These functions will be overridden from C++ code.
 // Unfortunately, we can't use extern "C" because Arduino preprocessor
 // doesn't generate forward declarations for extern "C" functions correctly,
 // so we use mangled names here.

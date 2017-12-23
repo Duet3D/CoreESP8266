@@ -61,7 +61,6 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/cores/esp8266}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/variants/nodemcu}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/libraries/ESP8266WiFi/src}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/libraries/ESP8266mDNS}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/sdk/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/LwipESP8266/src/include}&quot;"/>
 								</option>
@@ -96,7 +95,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="sdk/lwip_unused|libraries/Wire|variants/generic|variants/espinotee|variants/ESPDuino|variants/d1|variants/adafruit|libraries/GDBStub|variants/espresso_lite_v1|variants/d1_mini|variants/espino" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="variants/generic|variants/espinotee|variants/ESPDuino|variants/d1|variants/adafruit|libraries/GDBStub|variants/espresso_lite_v1|variants/d1_mini|variants/espino" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
