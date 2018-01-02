@@ -27,7 +27,9 @@
 
 #include "c_types.h"
 
-#if 0	// dc42 - this clashes with the identical declaration in lwip
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 struct ip_addr {
     uint32 addr;
@@ -40,8 +42,6 @@ struct ip_info {
     struct ip_addr netmask;
     struct ip_addr gw;
 };
-
-#endif
 
 /**
  * Determine if two address are on the same network.
@@ -87,5 +87,10 @@ uint32 ipaddr_addr(const char *cp);
     ip4_addr4_16(ipaddr)
 
 #define IPSTR "%d.%d.%d.%d"
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __IP_ADDR_H__ */
