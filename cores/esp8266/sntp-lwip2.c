@@ -34,18 +34,21 @@
  * TODOs:
  * settimeofday(): handle tv->tv_usec
  * sntp_mktm_r(): review, fix DST handling (this one is currently untouched from lwip-1.4)
+ * implement adjtime()
  */
 
 #include <lwip/init.h>
 #include <sys/time.h>
 #include <osapi.h>
 #include <os_type.h>
+#include "coredecls.h"
 
-#if 1
-// dc42 see later
-#else
-extern bool s_bootTimeSet;
-#endif
+static void (*_settimeofday_cb)(void) = NULL;
+
+void settimeofday_cb (void (*cb)(void))
+{
+    _settimeofday_cb = cb;
+}
 
 #if LWIP_VERSION_MAJOR == 1
 
@@ -63,10 +66,11 @@ int settimeofday(const struct timeval* tv, const struct timezone* tz)
     }
     if (tv) /* after*/
     {
+        // can't call lwip1.4's static sntp_set_system_time()
         os_printf(stod14);
 
         // reset time subsystem
-        s_bootTimeSet = false;
+        timeshift64_is_set = false;
         
         return -1;
     }
@@ -445,15 +449,13 @@ int settimeofday(const struct timeval* tv, const struct timezone* tz)
     }
     if (tv) /* after*/
     {
-        sntp_set_system_time(tv->tv_sec);
-        // XXX FIXME TODO: efficiently use provided tv->tv_sec
-        
         // reset time subsystem
-#if 1
-        // dc42 - s_bootTimeSet isn't defined anywhere
-#else
-        s_bootTimeSet = false;
-#endif
+        tune_timeshift64(tv->tv_sec * 1000000ULL + tv->tv_usec);
+
+        sntp_set_system_time(tv->tv_sec);
+
+        if (_settimeofday_cb)
+            _settimeofday_cb();
     }
     return 0;
 }

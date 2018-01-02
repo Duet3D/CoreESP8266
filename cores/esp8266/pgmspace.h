@@ -3,16 +3,18 @@
 
 #include <stdint.h>
 #include <stdio.h>
-#include <stdarg.h>
+
 
 #ifdef __ets__
 
-#ifdef __cplusplus
+#ifdef __cplusplus	// dc42 added
 extern "C" {
 #endif
+
 #include "ets_sys.h"
 #include "osapi.h"
-#ifdef __cplusplus
+
+#ifdef __cplusplus	// dc42 added
 }
 #endif
 
@@ -28,6 +30,10 @@ extern "C" {
 
 #endif // __ets__
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define _SFR_BYTE(n) (n)
 
@@ -136,5 +142,9 @@ static inline uint16_t pgm_read_word_inlined(const void* addr) {
 #define pgm_read_dword_far(addr) 	pgm_read_dword(addr)
 #define pgm_read_float_far(addr) 	pgm_read_float(addr)
 #define pgm_read_ptr_far(addr)		pgm_read_ptr(addr)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //__PGMSPACE_H_
