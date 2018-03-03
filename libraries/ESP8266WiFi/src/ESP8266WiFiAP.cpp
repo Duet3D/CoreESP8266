@@ -134,11 +134,16 @@ bool ESP8266WiFiAPClass::softAP(const char* ssid, const char* passphrase, int ch
     if(!softap_config_equal(conf, conf_current)) {
 
         ETS_UART_INTR_DISABLE();
+#if 1	//dc42
+        // Always save the ESP config in flash, otherwise it starts up with the ESP8266 default AP name every time
+        ret = wifi_softap_set_config(&conf);
+#else
         if(WiFi._persistent) {
             ret = wifi_softap_set_config(&conf);
         } else {
             ret = wifi_softap_set_config_current(&conf);
         }
+#endif
         ETS_UART_INTR_ENABLE();
 
         if(!ret) {
