@@ -38,7 +38,8 @@ class ClientContext;
 class WiFiClient;
 
 class WiFiServer : public Server {
-private:
+  // Secure server needs access to all the private entries here
+protected:
   uint16_t _port;
   IPAddress _addr;
   tcp_pcb* _pcb;
@@ -54,6 +55,7 @@ public:
   WiFiClient available(uint8_t* status = NULL);
   bool hasClient();
   void begin();
+  void begin(uint16_t port);
   void setNoDelay(bool nodelay);
   bool getNoDelay();
   virtual size_t write(uint8_t);

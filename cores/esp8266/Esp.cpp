@@ -107,11 +107,20 @@ void EspClass::wdtFeed(void)
 
 extern "C" void esp_yield();
 
-void EspClass::deepSleep(uint32_t time_us, WakeMode mode)
+void EspClass::deepSleep(uint64_t time_us, WakeMode mode)
 {
     system_deep_sleep_set_option(static_cast<int>(mode));
     system_deep_sleep(time_us);
     esp_yield();
+}
+
+//this calculation was taken verbatim from the SDK api reference for SDK 2.1.0.
+//Note: system_rtc_clock_cali_proc() returns a uint32_t, even though system_deep_sleep() takes a uint64_t.
+uint64_t EspClass::deepSleepMax()
+{
+  //cali*(2^31-1)/(2^12)
+  return (uint64_t)system_rtc_clock_cali_proc()*(0x80000000-1)/(0x1000);
+
 }
 
 bool EspClass::rtcUserMemoryRead(uint32_t offset, uint32_t *data, size_t size)
@@ -455,6 +464,8 @@ uint32_t EspClass::getFreeSketchSpace() {
     return freeSpaceEnd - freeSpaceStart;
 }
 
+#if 0	//dc42
+
 bool EspClass::updateSketch(Stream& in, uint32_t size, bool restartOnFail, bool restartOnSuccess) {
   if(!Update.begin(size)){
 #ifdef DEBUG_SERIAL
@@ -489,6 +500,8 @@ bool EspClass::updateSketch(Stream& in, uint32_t size, bool restartOnFail, bool 
     if(restartOnSuccess) ESP.restart();
     return true;
 }
+
+#endif
 
 static const int FLASH_INT_MASK = ((B10 << 8) | B00111010);
 

@@ -92,7 +92,8 @@ class EspClass {
         void wdtDisable();
         void wdtFeed();
 
-        void deepSleep(uint32_t time_us, RFMode mode = RF_DEFAULT);
+        void deepSleep(uint64_t time_us, RFMode mode = RF_DEFAULT);
+        uint64_t deepSleepMax();
 
         bool rtcUserMemoryRead(uint32_t offset, uint32_t *data, size_t size);
         bool rtcUserMemoryWrite(uint32_t offset, uint32_t *data, size_t size);
@@ -107,6 +108,7 @@ class EspClass {
 
         const char * getSdkVersion();
         String getCoreVersion();
+        String getFullVersion();
 
         uint8_t getBootVersion();
         uint8_t getBootMode();
@@ -135,7 +137,10 @@ class EspClass {
         uint32_t getSketchSize();
         String getSketchMD5();
         uint32_t getFreeSketchSpace();
+
+#if 0	//dc42
         bool updateSketch(Stream& in, uint32_t size, bool restartOnFail = false, bool restartOnSuccess = true);
+#endif
 
         String getResetReason();
         String getResetInfo();

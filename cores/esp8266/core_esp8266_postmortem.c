@@ -31,7 +31,7 @@
 
 extern void __real_system_restart_local();
 
-#if 0
+#if 0	//dc42
 extern void gdb_do_break();
 #endif
 
