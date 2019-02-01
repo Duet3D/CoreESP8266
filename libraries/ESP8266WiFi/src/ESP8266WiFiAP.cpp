@@ -93,25 +93,19 @@ static bool softap_config_equal(const softap_config& lhs, const softap_config& r
  */
 bool ESP8266WiFiAPClass::softAP(const char* ssid, const char* passphrase, int channel, int ssid_hidden, int max_connection) {
 
-    if(!WiFi.enableAP(true)) {
-        // enable AP failed
-        DEBUG_WIFI("[AP] enableAP failed!\n");
-        return false;
-    }
-
-    if(!ssid || strlen(ssid) == 0 || strlen(ssid) > 31) {
+	// DC42 2019-01-02: don't enable AP mode until we have checked everything and set the configuration.
+	// Otherwise, if an error occurs we end up with the dhcp server running even if we are not in AP mode, and eventually the software crashes.
+    if (!ssid || strlen(ssid) == 0 || strlen(ssid) > 31) {
         // fail SSID too long or missing!
         DEBUG_WIFI("[AP] SSID too long or missing!\n");
         return false;
     }
 
-    if(passphrase && strlen(passphrase) > 0 && (strlen(passphrase) > 63 || strlen(passphrase) < 8)) {
+    if (passphrase && strlen(passphrase) > 0 && (strlen(passphrase) > 63 || strlen(passphrase) < 8)) {
         // fail passphrase to long or short!
-        DEBUG_WIFI("[AP] fail passphrase to long or short!\n");
+        DEBUG_WIFI("[AP] fail passphrase too long or short!\n");
         return false;
     }
-
-    bool ret = true;
 
     struct softap_config conf;
     strcpy(reinterpret_cast<char*>(conf.ssid), ssid);
@@ -129,12 +123,14 @@ bool ESP8266WiFiAPClass::softAP(const char* ssid, const char* passphrase, int ch
         strcpy(reinterpret_cast<char*>(conf.password), passphrase);
     }
 
+    bool ret = true;
+
     struct softap_config conf_current;
     wifi_softap_get_config(&conf_current);
     if(!softap_config_equal(conf, conf_current)) {
 
         ETS_UART_INTR_DISABLE();
-#if 1	//dc42
+#if 0	//dc42
         // Always save the ESP config in flash, otherwise it starts up with the ESP8266 default AP name every time
         ret = wifi_softap_set_config(&conf);
 #else
@@ -153,6 +149,12 @@ bool ESP8266WiFiAPClass::softAP(const char* ssid, const char* passphrase, int ch
 
     } else {
         DEBUG_WIFI("[AP] softap config unchanged\n");
+    }
+
+    if(!WiFi.enableAP(true)) {
+        // enable AP failed
+        DEBUG_WIFI("[AP] enableAP failed!\n");
+        return false;
     }
 
     if(wifi_softap_dhcps_status() != DHCP_STARTED) {

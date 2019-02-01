@@ -36,7 +36,6 @@ extern "C" {
 #include "stdlib_noniso.h"
 #include "binary.h"
 #include "esp8266_peri.h"
-#include "twi.h"
 #include "core_esp8266_features.h"
 
 #define HIGH 0x1
