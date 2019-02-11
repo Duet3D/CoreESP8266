@@ -52,3 +52,5 @@ Temporary Items
 *.unused
 *.mk
 
+# Eclipse
+.settings/language.settings.xml
