@@ -52,3 +52,5 @@ Temporary Items
 *.unused
 *.mk
 
+# Output folders
+/Release/
