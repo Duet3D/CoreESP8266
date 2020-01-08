@@ -54,3 +54,6 @@ Temporary Items
 
 # Output folders
 /Release/
+
+# Misc
+.settings/language.settings/xml
