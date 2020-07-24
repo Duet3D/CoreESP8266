@@ -1,9 +1,9 @@
-/* 
+/*
   esp8266_peri.h - Peripheral registers exposed in more AVR style for esp8266
 
   Copyright (c) 2015 Hristo Gochkov. All rights reserved.
   This file is part of the esp8266 core for Arduino environment.
- 
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
@@ -491,6 +491,7 @@ extern uint8_t esp8266_gpioToFn[16];
 #define SPIUCSSETUP (1 << 5) //SPI_CS_SETUP
 #define SPIUCSHOLD (1 << 4) //SPI_CS_HOLD
 #define SPIUAHBUCMD (1 << 3) //SPI_AHB_USR_COMMAND
+#define SPIU_FLASH_MODE (1 << 2)
 #define SPIUAHBUCMD4B (1 << 1) //SPI_AHB_USR_COMMAND_4BYTE
 #define SPIUDUPLEX (1 << 0) //SPI_DOUTDIN
 

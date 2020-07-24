@@ -49,6 +49,12 @@ EEPROMClass::EEPROMClass(void)
 }
 
 void EEPROMClass::begin(size_t size) {
+#if 1	//dc42
+	// to support both the 4M chips in existing Duet WiFi boards and 2M chips that may be used in Duet 3 Mini boards, put the EEPROM close to the end of memory
+	const uint32_t flashSize = 1u << ((spi_flash_get_id() >> 16) & 0xFF);
+	_sector = (flashSize - 0x5000)/SPI_FLASH_SEC_SIZE;
+#endif
+
   if (size <= 0)
     return;
   if (size > SPI_FLASH_SEC_SIZE)
