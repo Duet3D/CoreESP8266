@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include <stdarg.h>	// dc42 added
 
 
 #ifdef __ets__

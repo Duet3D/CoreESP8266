@@ -25,10 +25,6 @@
 #ifndef __WPA2_ENTERPRISE_H__
 #define __WPA2_ENTERPRISE_H__
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef long os_time_t;
 
 struct os_time {
@@ -65,9 +61,5 @@ bool  wifi_station_get_enterprise_disable_time_check(void);
 
 void  wpa2_enterprise_set_user_get_time(get_time_func_t cb);
 
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* __WPA2_ENTERPRISE_H__ */

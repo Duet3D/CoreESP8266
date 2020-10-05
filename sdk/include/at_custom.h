@@ -27,10 +27,6 @@
 
 #include "c_types.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef struct
 {
   char *at_cmdName;
@@ -172,9 +168,5 @@ bool at_fake_uart_enable(bool enable,at_fake_uart_tx_func_type at_fake_uart_tx_f
   * @retval TRUE,if set ok,otherwize FALSE.
   */
 bool at_set_escape_character(uint8 ch);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

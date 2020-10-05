@@ -82,7 +82,7 @@ static std::list<WiFiEventHandler> sCbEventList;
 bool ESP8266WiFiGenericClass::_persistent = true;
 WiFiMode_t ESP8266WiFiGenericClass::_forceSleepLastMode = WIFI_OFF;
 
-ESP8266WiFiGenericClass::ESP8266WiFiGenericClass() 
+ESP8266WiFiGenericClass::ESP8266WiFiGenericClass()
 {
     wifi_set_event_handler_cb((wifi_event_handler_cb_t) &ESP8266WiFiGenericClass::_eventCallback);
 }
@@ -214,7 +214,7 @@ WiFiEventHandler ESP8266WiFiGenericClass::onSoftAPModeProbeRequestReceived(std::
  * callback for WiFi events
  * @param arg
  */
-void ESP8266WiFiGenericClass::_eventCallback(void* arg) 
+void ESP8266WiFiGenericClass::_eventCallback(void* arg)
 {
     System_Event_t* event = reinterpret_cast<System_Event_t*>(arg);
     DEBUG_WIFI("wifi evt: %d\n", event->event);
@@ -250,7 +250,7 @@ int32_t ESP8266WiFiGenericClass::channel(void) {
  * @return bool
  */
 bool ESP8266WiFiGenericClass::setSleepMode(WiFiSleepType_t type) {
-    return wifi_set_sleep_type((sleep_type_t) type);
+    return wifi_set_sleep_type((sleep_type) type);
 }
 
 /**
@@ -267,7 +267,7 @@ WiFiSleepType_t ESP8266WiFiGenericClass::getSleepMode() {
  * @return bool
  */
 bool ESP8266WiFiGenericClass::setPhyMode(WiFiPhyMode_t mode) {
-    return wifi_set_phy_mode((phy_mode_t) mode);
+    return wifi_set_phy_mode((phy_mode) mode);
 }
 
 /**

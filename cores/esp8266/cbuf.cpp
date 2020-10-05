@@ -1,8 +1,8 @@
-/* 
+/*
  cbuf.cpp - Circular buffer implementation
  Copyright (c) 2014 Ivan Grokhotkov. All rights reserved.
  This file is part of the esp8266 core for Arduino environment.
- 
+
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
@@ -19,7 +19,10 @@
  */
 
 #include "cbuf.h"
+
+extern "C" {
 #include "c_types.h"
+}
 
 cbuf::cbuf(size_t size) :
     next(NULL), _size(size), _buf(new char[size]), _bufend(_buf + size), _begin(_buf), _end(_begin) {

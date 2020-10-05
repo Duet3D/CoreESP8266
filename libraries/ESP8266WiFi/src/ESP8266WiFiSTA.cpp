@@ -26,6 +26,7 @@
 #include "ESP8266WiFiGeneric.h"
 #include "ESP8266WiFiSTA.h"
 
+extern "C" {
 #include "c_types.h"
 #include "ets_sys.h"
 #include "os_type.h"
@@ -34,7 +35,6 @@
 #include "user_interface.h"
 #include "smartconfig.h"
 
-extern "C" {
 #include "lwip/err.h"
 #include "lwip/dns.h"
 #include "lwip/init.h" // LWIP_VERSION_
@@ -501,7 +501,7 @@ bool ESP8266WiFiSTAClass::hostname(String aHostname) {
  *
  */
 wl_status_t ESP8266WiFiSTAClass::status() {
-    station_status_t status = wifi_station_get_connect_status();
+    int status = wifi_station_get_connect_status();
 
     switch(status) {
         case STATION_GOT_IP:
@@ -644,11 +644,13 @@ void wifi_wps_status_cb(wps_cb_status status) {
         case WPS_CB_ST_WEP:
             DEBUGV("wps WEP\n");
             break;
+#if 0
         case WPS_CB_ST_UNK:
             DEBUGV("wps UNKNOWN\n");
             if(!wifi_wps_disable()) {
                 DEBUGV("wps disable failed\n");
             }
+#endif
             break;
     }
     // TODO user function to get status

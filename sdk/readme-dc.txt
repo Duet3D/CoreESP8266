@@ -1,0 +1,1 @@
+The files in this folder are from the Expressif SDK release 2.2.1. Files c_types.h, spi_flash.h and ets_sys.h include changes by me where flagged "dc42".

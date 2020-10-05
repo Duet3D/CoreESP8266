@@ -25,10 +25,6 @@
 #ifndef SPI_FLASH_H
 #define SPI_FLASH_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef enum {
     SPI_FLASH_RESULT_OK,
     SPI_FLASH_RESULT_ERR,
@@ -46,6 +42,7 @@ typedef struct{
 
 #define SPI_FLASH_SEC_SIZE      4096
 
+// next line added by dc42
 extern SpiFlashChip * flashchip; // in ram ROM-BIOS
 
 uint32 spi_flash_get_id(void);
@@ -63,10 +60,5 @@ void spi_flash_set_read_func(user_spi_flash_read read);
 
 bool spi_flash_erase_protect_enable(void);
 bool spi_flash_erase_protect_disable(void);
-
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

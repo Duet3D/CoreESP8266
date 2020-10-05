@@ -27,10 +27,6 @@
 
 #include "c_types.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 struct ip_addr {
     uint32 addr;
 };
@@ -87,10 +83,5 @@ uint32 ipaddr_addr(const char *cp);
     ip4_addr4_16(ipaddr)
 
 #define IPSTR "%d.%d.%d.%d"
-
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* __IP_ADDR_H__ */
